@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LearningInsightsPanel } from "@/components/LearningInsightsPanel";
+import { buildOfflineInsights } from "@/lib/ai/insights";
 import { listActionPlans } from "@/lib/services/action-plan-service";
 import {
   generateAndSaveInsights,
@@ -8,19 +9,22 @@ import {
 import { OUTCOME_LABELS } from "@/lib/validations/learning";
 import { formatDate } from "@/lib/utils";
 
-export default async function ProgressPage() {
-  const overview = await getProgressOverview();
-  const { insights, generatedAt, cached } = await generateAndSaveInsights(false);
-  const allPlans = await listActionPlans();
+export const dynamic = "force-dynamic";
 
-  return (
-    <div className="space-y-10">
-      <LearningInsightsPanel
-        initialInsights={insights}
-        generatedAt={generatedAt}
-        cached={cached}
-        stats={overview.stats}
-      />
+export default async function ProgressPage() {
+  try {
+    const overview = await getProgressOverview();
+    const { insights, generatedAt, cached } = await generateAndSaveInsights(false);
+    const allPlans = await listActionPlans();
+
+    return (
+      <div className="space-y-10">
+        <LearningInsightsPanel
+          initialInsights={insights}
+          generatedAt={generatedAt}
+          cached={cached}
+          stats={overview.stats}
+        />
 
       <section className="card">
         <h2 className="mb-4 font-semibold">Recent interview debriefs</h2>
@@ -105,5 +109,40 @@ export default async function ProgressPage() {
         )}
       </section>
     </div>
-  );
+    );
+  } catch {
+    const emptyContext = {
+      sessionCount: 0,
+      debriefCount: 0,
+      sessions: [],
+      debriefs: [],
+      actionPlans: [],
+      averageQuestionAccuracy: null,
+    };
+    const insights = buildOfflineInsights(emptyContext);
+
+    return (
+      <div className="space-y-10">
+        <LearningInsightsPanel
+          initialInsights={insights}
+          generatedAt={new Date().toISOString()}
+          cached={false}
+          stats={{
+            sessions: 0,
+            debriefs: 0,
+            actionPlans: 0,
+            completedPlans: 0,
+            averageAccuracy: null,
+          }}
+        />
+        <section className="card">
+          <p className="text-sm text-gray-600">
+            Progress data is unavailable right now. If this persists on production,
+            confirm <code className="text-xs">TURSO_DATABASE_URL</code> and{" "}
+            <code className="text-xs">TURSO_AUTH_TOKEN</code> are set in Vercel.
+          </p>
+        </section>
+      </div>
+    );
+  }
 }
