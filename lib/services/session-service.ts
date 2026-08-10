@@ -11,6 +11,7 @@ import {
 import { analyzeIntake } from "@/lib/ai/analyzer";
 import { generateCoachFeedback, generateFollowUp } from "@/lib/ai/coach";
 import { predictQuestions } from "@/lib/ai/predictor";
+import { buildLearningContext } from "@/lib/services/learning-service";
 import {
   evidenceLine,
 } from "@/lib/evaluations/checks";
@@ -148,6 +149,37 @@ export async function analyzeSession(sessionId: string) {
   }
 
   let predicted: Awaited<ReturnType<typeof predictQuestions>>;
+  let learningHistorySummary: string | undefined;
+  try {
+    const learning = await buildLearningContext();
+    if (learning.debriefCount > 0 || learning.sessionCount > 1) {
+      const missed = learning.debriefs.flatMap((d) => d.questionsMissed).slice(0, 8);
+      const difficulties = learning.debriefs
+        .map((d) => d.unexpectedDifficulties)
+        .filter(Boolean)
+        .slice(0, 3);
+      learningHistorySummary = [
+        learning.debriefs.length
+          ? `Past debrief accuracy avg: ${learning.averageQuestionAccuracy?.toFixed(1) ?? "n/a"}/5`
+          : null,
+        missed.length ? `Questions we missed before: ${missed.join("; ")}` : null,
+        difficulties.length
+          ? `Unexpected difficulties: ${difficulties.join("; ")}`
+          : null,
+        learning.sessions
+          .flatMap((s) => s.topImprovements)
+          .slice(0, 5)
+          .length
+          ? `Recurring weak areas: ${[...new Set(learning.sessions.flatMap((s) => s.topImprovements))].slice(0, 5).join(", ")}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(". ");
+    }
+  } catch {
+    learningHistorySummary = undefined;
+  }
+
   try {
     predicted = await predictQuestions({
       targetCompanyOrSchool: session.targetCompanyOrSchool,
@@ -161,6 +193,7 @@ export async function analyzeSession(sessionId: string) {
       personaHints: session.userPersona
         ? PERSONA_QUESTION_HINTS[session.userPersona as keyof typeof PERSONA_QUESTION_HINTS]
         : undefined,
+      learningHistorySummary,
     });
   } catch {
     predicted = fallbackQuestions(session);

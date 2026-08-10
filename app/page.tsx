@@ -28,7 +28,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
             title: "Predict questions",
@@ -42,12 +42,29 @@ export default async function HomePage() {
             title: "Coaching dashboard",
             desc: "Structured rubrics, priority improvements, and action plans.",
           },
+          {
+            title: "Learn over time",
+            desc: "Track action plans, log real interview debriefs, and get long-term insights.",
+          },
         ].map((item) => (
           <div key={item.title} className="card">
             <h2 className="font-semibold text-gray-900">{item.title}</h2>
             <p className="mt-2 text-sm text-gray-600">{item.desc}</p>
           </div>
         ))}
+      </section>
+
+      <section className="card flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="font-semibold">Your progress hub</h2>
+          <p className="mt-1 text-sm text-gray-600">
+            See behavior patterns, long-term goals, and prediction accuracy across
+            all sessions.
+          </p>
+        </div>
+        <Link href="/progress" className="btn-secondary">
+          View progress
+        </Link>
       </section>
 
       <section className="card">

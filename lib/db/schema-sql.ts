@@ -63,6 +63,43 @@ export const SCHEMA_STATEMENTS = [
     sample_answer TEXT,
     version INTEGER NOT NULL DEFAULT 1
   )`,
+  `CREATE TABLE IF NOT EXISTS action_plans (
+    id TEXT PRIMARY KEY,
+    session_id TEXT REFERENCES sessions(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    category TEXT DEFAULT 'other',
+    priority TEXT DEFAULT 'medium',
+    status TEXT DEFAULT 'pending',
+    source TEXT DEFAULT 'manual',
+    due_date TEXT,
+    completed_at TEXT,
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS interview_debriefs (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    interview_date TEXT,
+    outcome TEXT DEFAULT 'ongoing',
+    how_it_went TEXT NOT NULL,
+    question_accuracy_rating INTEGER,
+    questions_asked TEXT,
+    questions_we_missed TEXT,
+    unexpected_difficulties TEXT,
+    what_went_well TEXT,
+    what_to_improve TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE TABLE IF NOT EXISTS learning_snapshots (
+    id TEXT PRIMARY KEY,
+    insights TEXT NOT NULL,
+    session_count INTEGER NOT NULL,
+    debrief_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
 ];
 
 export const MIGRATION_COLUMNS = [

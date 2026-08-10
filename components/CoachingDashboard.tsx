@@ -133,6 +133,30 @@ export function CoachingDashboard({
             <li key={i}>{action}</li>
           ))}
         </ol>
+        <p className="mt-4 text-sm text-gray-500">
+          Track these items over time and mark progress as you prepare for real
+          interviews.
+        </p>
+        <Link
+          href={`/sessions/${sessionId}/action-plans`}
+          className="mt-3 inline-block text-sm font-medium text-brand-600 hover:underline"
+        >
+          Open action plan tracker →
+        </Link>
+      </section>
+
+      <section className="card border-brand-100 bg-brand-50/30">
+        <h2 className="mb-2 font-semibold">Had your real interview?</h2>
+        <p className="text-sm text-gray-600">
+          Log how it went, rate our question predictions, and note any surprises.
+          MockIt uses this to learn your patterns and improve over time.
+        </p>
+        <Link
+          href={`/sessions/${sessionId}/debrief`}
+          className="btn-primary mt-4 inline-flex"
+        >
+          Log interview debrief
+        </Link>
       </section>
 
       {data.recentScores.length > 0 && (
@@ -172,6 +196,9 @@ export function CoachingDashboard({
         </Link>
         <Link href={`/sessions/${sessionId}/summary`} className="btn-secondary">
           Full transcript
+        </Link>
+        <Link href="/progress" className="btn-secondary">
+          Your progress
         </Link>
       </div>
     </div>

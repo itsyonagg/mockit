@@ -22,6 +22,9 @@ export default function RootLayout({
               MockIt
             </Link>
             <nav className="flex gap-4 text-sm text-gray-600">
+              <Link href="/progress" className="hover:text-brand-600">
+                Progress
+              </Link>
               <Link href="/sessions/new" className="hover:text-brand-600">
                 New session
               </Link>

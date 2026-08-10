@@ -181,6 +181,8 @@ export const sessionsRelations = relations(sessions, ({ one, many }) => ({
   materials: many(materials),
   questions: many(questions),
   answers: many(answers),
+  actionPlans: many(actionPlans),
+  debriefs: many(interviewDebriefs),
 }));
 
 export const materialsRelations = relations(materials, ({ one }) => ({
@@ -228,3 +230,132 @@ export const feedbackRelations = relations(feedback, ({ one }) => ({
     references: [evaluations.id],
   }),
 }));
+
+export type ActionPlanCategory =
+  | "behavior"
+  | "technical"
+  | "communication"
+  | "preparation"
+  | "mindset"
+  | "other";
+
+export type ActionPlanStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "skipped";
+
+export type ActionPlanSource = "coaching" | "manual" | "insight";
+
+export const actionPlans = sqliteTable("action_plans", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").references(() => sessions.id, {
+    onDelete: "cascade",
+  }),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category").$type<ActionPlanCategory>().default("other"),
+  priority: text("priority", { enum: ["high", "medium", "low"] }).default(
+    "medium",
+  ),
+  status: text("status").$type<ActionPlanStatus>().default("pending"),
+  source: text("source").$type<ActionPlanSource>().default("manual"),
+  dueDate: text("due_date"),
+  completedAt: text("completed_at"),
+  notes: text("notes"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type InterviewOutcome =
+  | "pending"
+  | "passed"
+  | "rejected"
+  | "offer"
+  | "withdrawn"
+  | "ongoing";
+
+export const interviewDebriefs = sqliteTable("interview_debriefs", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id, { onDelete: "cascade" }),
+  interviewDate: text("interview_date"),
+  outcome: text("outcome").$type<InterviewOutcome>().default("ongoing"),
+  howItWent: text("how_it_went").notNull(),
+  questionAccuracyRating: integer("question_accuracy_rating"),
+  questionsAsked: text("questions_asked", { mode: "json" }).$type<string[]>(),
+  questionsWeMissed: text("questions_we_missed", { mode: "json" }).$type<
+    string[]
+  >(),
+  unexpectedDifficulties: text("unexpected_difficulties"),
+  whatWentWell: text("what_went_well"),
+  whatToImprove: text("what_to_improve"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type BehaviorTrend = "improving" | "stable" | "needs_attention";
+
+export type LearningInsights = {
+  summary: string;
+  behaviorPatterns: {
+    pattern: string;
+    evidence: string;
+    trend: BehaviorTrend;
+  }[];
+  improvementAreas: {
+    area: string;
+    priority: "high" | "medium" | "low";
+    recommendation: string;
+    sessionsAffected: number;
+  }[];
+  longTermActionPlan: {
+    goal: string;
+    milestones: string[];
+    timeframe: string;
+  }[];
+  predictionAccuracy: {
+    averageRating: number | null;
+    trend: string;
+    notes: string;
+  };
+  strengths: string[];
+};
+
+export const learningSnapshots = sqliteTable("learning_snapshots", {
+  id: text("id").primaryKey(),
+  insights: text("insights", { mode: "json" })
+    .notNull()
+    .$type<LearningInsights>(),
+  sessionCount: integer("session_count").notNull(),
+  debriefCount: integer("debrief_count").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export const actionPlansRelations = relations(actionPlans, ({ one }) => ({
+  session: one(sessions, {
+    fields: [actionPlans.sessionId],
+    references: [sessions.id],
+  }),
+}));
+
+export const interviewDebriefsRelations = relations(
+  interviewDebriefs,
+  ({ one }) => ({
+    session: one(sessions, {
+      fields: [interviewDebriefs.sessionId],
+      references: [sessions.id],
+    }),
+  }),
+);

@@ -21,8 +21,9 @@ export async function predictQuestions(input: {
   jobDescription?: string;
   specificConcerns?: string;
   personaHints?: string[];
+  learningHistorySummary?: string;
 }): Promise<PredictedQuestion[]> {
-  const system = `You predict likely interview questions for a specific opportunity. Return JSON: { "questions": [{ "text", "probabilityScore" (0-100), "importanceScore" (0-100), "rationale" }] }. Generate 8-12 tailored questions — NOT generic lists. Explain why each is likely. Prioritize by probability and importance. Weight questions for the candidate's industry, persona, company/school, and role.`;
+  const system = `You predict likely interview questions for a specific opportunity. Return JSON: { "questions": [{ "text", "probabilityScore" (0-100), "importanceScore" (0-100), "rationale" }] }. Generate 8-12 tailored questions — NOT generic lists. Explain why each is likely. Prioritize by probability and importance. Weight questions for the candidate's industry, persona, company/school, and role.${input.learningHistorySummary ? " Use the candidate's past interview debriefs and missed questions to avoid blind spots and double down on patterns they've struggled with." : ""}`;
 
   const result = await chatJson<PredictionResult>(system, JSON.stringify(input));
   return result.questions ?? [];
