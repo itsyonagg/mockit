@@ -30,6 +30,8 @@ yarn-error.log*
 # database
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 
 # local node via conda
 .conda-node/
