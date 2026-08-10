@@ -36,6 +36,9 @@ yarn-error.log*
 # local node via conda
 .conda-node/
 
+# local tools
+.tools/
+
 # uploaded documents
 /uploads/
 
