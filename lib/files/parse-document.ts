@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import mammoth from "mammoth";
+import { extractTextFromPdf } from "@/lib/files/pdf-extract";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -38,11 +39,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
   }
 
   if (ext === ".pdf") {
-    const pdfParse = (await import("pdf-parse")).default as (
-      buffer: Buffer,
-    ) => Promise<{ text: string }>;
-    const result = await pdfParse(buffer);
-    return result.text.trim();
+    return extractTextFromPdf(buffer);
   }
 
   if (ext === ".docx") {

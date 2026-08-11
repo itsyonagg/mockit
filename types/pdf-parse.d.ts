@@ -1,12 +1,26 @@
-declare module "pdf-parse" {
-  interface PDFData {
-    text: string;
-    numpages: number;
-    info: Record<string, unknown>;
-    metadata: Record<string, unknown> | null;
-    version: string;
+declare module "pdf-parse/worker" {
+  export class CanvasFactory {
+    create(width: number, height: number): {
+      canvas: unknown;
+      context: unknown;
+    };
+    reset(
+      canvasAndContext: { canvas: unknown; context: unknown },
+      width: number,
+      height: number,
+    ): void;
+    destroy(canvasAndContext: { canvas: unknown; context: unknown }): void;
   }
+}
 
-  function pdf(dataBuffer: Buffer, options?: Record<string, unknown>): Promise<PDFData>;
-  export default pdf;
+declare module "pdf-parse" {
+  export class PDFParse {
+    constructor(options: {
+      data: Buffer | Uint8Array;
+      CanvasFactory?: unknown;
+      verbosity?: number;
+    });
+    getText(): Promise<{ text: string; pages: { text: string; num: number }[] }>;
+    destroy(): Promise<void>;
+  }
 }
